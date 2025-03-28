@@ -8,6 +8,7 @@ This project implements a user repository backend in Go, providing functionality
 
 ```bash
    git clone <repository-url>
+   cp ./backend/.env.example ./backend/.env
    docker compose up -d --build
 ```
 
