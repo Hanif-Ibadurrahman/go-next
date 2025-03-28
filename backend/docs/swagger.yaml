@@ -11,33 +11,11 @@ definitions:
       status:
         type: integer
     type: object
-  models.MarriedCode:
-    properties:
-      created_at:
-        $ref: '#/definitions/util.CustomTime'
-      deleted_at:
-        $ref: '#/definitions/util.CustomTime'
-      id:
-        type: integer
-      married_code:
-        type: string
-      sam_id:
-        type: string
-      updated_at:
-        $ref: '#/definitions/util.CustomTime'
-    type: object
   models.RequestAuthLogin:
     properties:
       password:
         type: string
       username:
-        type: string
-    type: object
-  models.RequestCreateMarriedCode:
-    properties:
-      married_code:
-        type: string
-      sam_id:
         type: string
     type: object
   models.RequestCreateUser:
@@ -49,13 +27,6 @@ definitions:
       password:
         type: string
       username:
-        type: string
-    type: object
-  models.RequestUpdateMarriedCode:
-    properties:
-      married_code:
-        type: string
-      sam_id:
         type: string
     type: object
   models.RequestUpdateUser:
@@ -85,11 +56,6 @@ definitions:
       name:
         type: string
       username:
-        type: string
-    type: object
-  util.CustomTime:
-    properties:
-      time.Time:
         type: string
     type: object
 info:
@@ -129,208 +95,6 @@ paths:
       summary: Create login
       tags:
       - Login
-  /v1/married-codes:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all marriedcodes with pagination
-      parameters:
-      - description: Limit the number of marriedcodes per page (min 1 and max 100)
-        example: 10
-        in: query
-        name: limit
-        required: true
-        type: integer
-      - description: Page number for pagination (min 1)
-        example: 1
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: Search term for sam_id and married_code
-        in: query
-        name: search
-        type: string
-      - description: Order for sam_id and married_code
-        in: query
-        name: order_by
-        type: string
-      - description: Sort for asc and desc
-        in: query
-        name: sort_by
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.MarriedCode'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-      security:
-      - BearerAuth: []
-      summary: Get All MarriedCodes
-      tags:
-      - MarriedCode
-    post:
-      consumes:
-      - application/json
-      description: Create marriedcode in the system
-      parameters:
-      - description: MarriedCode creation payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.RequestCreateMarriedCode'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.MarriedCode'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-      security:
-      - BearerAuth: []
-      summary: Create MarriedCode
-      tags:
-      - MarriedCode
-  /v1/married-codes/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Soft delete a married code by ID
-      parameters:
-      - description: Married Code ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully soft deleted married code
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "401":
-          description: Unauthorized - Invalid or missing token
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "404":
-          description: Married code not found
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-      security:
-      - BearerAuth: []
-      summary: Soft Delete a Married Code
-      tags:
-      - MarriedCode
-    get:
-      consumes:
-      - application/json
-      description: Retrieve details of a specific married code by ID
-      parameters:
-      - description: Married Code ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successful response with married code details
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "401":
-          description: Unauthorized - Invalid or missing token
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "404":
-          description: Married code not found
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-      security:
-      - BearerAuth: []
-      summary: Get Married Code Details
-      tags:
-      - MarriedCode
-    put:
-      consumes:
-      - application/json
-      description: Update an existing married code by ID
-      parameters:
-      - description: Married Code ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Married code update payload
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.RequestUpdateMarriedCode'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated married code
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "400":
-          description: Invalid request body or duplicate married_code
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "401":
-          description: Unauthorized - Invalid or missing token
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "404":
-          description: Married code not found
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/models.CommonResponse'
-      security:
-      - BearerAuth: []
-      summary: Update a Married Code
-      tags:
-      - MarriedCode
   /v1/user:
     post:
       consumes:

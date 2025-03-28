@@ -17,7 +17,7 @@ func NewUser(db *gorm.DB) *User {
 
 func (u *User) Search(ctx context.Context, req models.QuerySearch) ([]models.UserDetail, error) {
 	var flatUsers []models.FlatUser
-	err := u.db.WithContext(ctx).
+	query := u.db.WithContext(ctx).
 		Table("users").
 		Select(`
             users.id_user,
@@ -32,52 +32,76 @@ func (u *User) Search(ctx context.Context, req models.QuerySearch) ([]models.Use
             bank_accounts.balance
         `).
 		Joins("LEFT JOIN bank_accounts ON bank_accounts.user_id = users.id_user").
-		Where("users.name ILIKE ? OR users.username ILIKE ?", "%"+req.Q+"%", "%"+req.Q+"%").
-		Scan(&flatUsers).Error
+		Joins("LEFT JOIN pockets ON pockets.bank_account_id = bank_accounts.id").
+		Joins("LEFT JOIN term_deposits ON term_deposits.bank_account_id = bank_accounts.id")
+
+	if req.Q != "" {
+		query = query.Where(`
+            users.name ILIKE ? OR 
+            users.username ILIKE ? OR 
+            bank_accounts.account_number ILIKE ? OR 
+            pockets.pocket_name ILIKE ? OR 
+            term_deposits.status ILIKE ?
+        `, "%"+req.Q+"%", "%"+req.Q+"%", "%"+req.Q+"%", "%"+req.Q+"%", "%"+req.Q+"%")
+	}
+
+	err := query.Scan(&flatUsers).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert to UserDetail and fetch nested data
-	users := make([]models.UserDetail, len(flatUsers))
-	for i, fu := range flatUsers {
-		users[i] = models.UserDetail{
-			IDUser:        fu.IDUser,
-			Name:          fu.Name,
-			Username:      fu.Username,
-			Level:         fu.Level,
-			CreatedAt:     fu.CreatedAt,
-			UpdatedAt:     fu.UpdatedAt,
-			LastLogin:     fu.LastLogin,
-			IsActive:      fu.IsActive,
-			AccountNumber: fu.AccountNumber,
-			Balance:       fu.Balance,
-		}
+	seenUsers := make(map[int]bool)
+	uniqueUsers := []models.UserDetail{}
 
-		// Pockets
-		var pockets []models.Pocket
-		err = u.db.WithContext(ctx).
-			Table("pockets").
-			Where("bank_account_id IN (SELECT id FROM bank_accounts WHERE user_id = ?)", users[i].IDUser).
-			Find(&pockets).Error
-		if err != nil {
-			return nil, err
-		}
-		users[i].Pockets = pockets
+	for _, fu := range flatUsers {
+		if !seenUsers[fu.IDUser] {
+			user := models.UserDetail{
+				IDUser:        fu.IDUser,
+				Name:          fu.Name,
+				Username:      fu.Username,
+				Level:         fu.Level,
+				CreatedAt:     fu.CreatedAt,
+				UpdatedAt:     fu.UpdatedAt,
+				LastLogin:     fu.LastLogin,
+				IsActive:      fu.IsActive,
+				AccountNumber: fu.AccountNumber,
+				Balance:       fu.Balance,
+			}
 
-		// Term Deposits
-		var termDeposits []models.TermDeposit
-		err = u.db.WithContext(ctx).
-			Table("term_deposits").
-			Where("bank_account_id IN (SELECT id FROM bank_accounts WHERE user_id = ?)", users[i].IDUser).
-			Find(&termDeposits).Error
-		if err != nil {
-			return nil, err
+			// Pockets
+			var pockets []models.Pocket
+			pocketQuery := u.db.WithContext(ctx).
+				Table("pockets").
+				Where("bank_account_id IN (SELECT id FROM bank_accounts WHERE user_id = ?)", user.IDUser)
+			if req.Q != "" {
+				pocketQuery = pocketQuery.Where("pocket_name ILIKE ?", "%"+req.Q+"%")
+			}
+			err = pocketQuery.Find(&pockets).Error
+			if err != nil {
+				return nil, err
+			}
+			user.Pockets = pockets
+
+			// Term Deposits
+			var termDeposits []models.TermDeposit
+			termQuery := u.db.WithContext(ctx).
+				Table("term_deposits").
+				Where("bank_account_id IN (SELECT id FROM bank_accounts WHERE user_id = ?)", user.IDUser)
+			if req.Q != "" {
+				termQuery = termQuery.Where("status ILIKE ?", "%"+req.Q+"%")
+			}
+			err = termQuery.Find(&termDeposits).Error
+			if err != nil {
+				return nil, err
+			}
+			user.TermDeposits = termDeposits
+
+			seenUsers[fu.IDUser] = true
+			uniqueUsers = append(uniqueUsers, user)
 		}
-		users[i].TermDeposits = termDeposits
 	}
 
-	return users, nil
+	return uniqueUsers, nil
 }
 
 func (u *User) CreateUser(ctx context.Context, req models.User) (*models.User, error) {

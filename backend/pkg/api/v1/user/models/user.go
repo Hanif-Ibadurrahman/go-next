@@ -4,11 +4,10 @@ import (
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type QuerySearch struct {
-	Q string `json:"q"`
+	Q string `query:"q"`
 }
 
 type RequestCreateUser struct {
@@ -107,7 +106,7 @@ type TermDeposit struct {
 
 func (v *QuerySearch) Validate() error {
 	return validation.ValidateStruct(v,
-		validation.Field(&v.Q, validation.Length(0, 100), is.Alphanumeric),
+		validation.Field(&v.Q, validation.Length(0, 100)),
 	)
 }
 
