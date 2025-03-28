@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: go_backend
     ports:
-      - "5003:5003"
+      - "8000:8000"
     environment:
       - POSTGRE_DB_HOST=db
       - POSTGRE_DB_PORT=5432

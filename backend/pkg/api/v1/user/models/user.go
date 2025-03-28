@@ -37,17 +37,16 @@ type ResponseCreateUser struct {
 }
 
 type User struct {
-	IDUser       int
-	Name         string
-	Username     string
-	Password     string
-	Level        int
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	LastLogin    *time.Time
-	IsActive     int
-	DeletedAt    *time.Time
-	BankAccounts []BankAccount
+	IDUser    int
+	Name      string
+	Username  string
+	Password  string
+	Level     int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	LastLogin *time.Time
+	IsActive  int
+	DeletedAt *time.Time
 }
 
 type FlatUser struct {
@@ -64,46 +63,46 @@ type FlatUser struct {
 }
 
 type UserDetail struct {
-	IDUser        int
-	Name          string
-	Username      string
-	Level         int
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	LastLogin     *time.Time
-	IsActive      int
-	AccountNumber string
-	Balance       float64
-	Pockets       []Pocket
-	TermDeposits  []TermDeposit
+	IDUser        int           `json:"id_user"`
+	Name          string        `json:"name"`
+	Username      string        `json:"username"`
+	Level         int           `json:"level"`
+	CreatedAt     time.Time     `json:"created_at"`
+	UpdatedAt     time.Time     `json:"updated_at"`
+	LastLogin     *time.Time    `json:"last_login"`
+	IsActive      int           `json:"is_active"`
+	AccountNumber string        `json:"account_number"`
+	Balance       float64       `json:"balance"`
+	Pockets       []Pocket      `json:"pockets"`
+	TermDeposits  []TermDeposit `json:"term_deposits"`
 }
 type BankAccount struct {
-	ID            int
-	CustomerID    int
-	AccountNumber string
-	Balance       float64
-	CreatedAt     time.Time
-	Pockets       []Pocket
-	TermDeposits  []TermDeposit
+	ID            int           `json:"id"`
+	CustomerID    int           `json:"customer_id"`
+	AccountNumber string        `json:"account_number"`
+	Balance       float64       `json:"balance"`
+	CreatedAt     time.Time     `json:"created_at"`
+	Pockets       []Pocket      `json:"pockets"`
+	TermDeposits  []TermDeposit `json:"term_deposits"`
 }
 
 type Pocket struct {
-	ID            int
-	BankAccountID int
-	PocketName    string
-	Balance       float64
-	CreatedAt     time.Time
+	ID            int       `json:"id"`
+	BankAccountID int       `json:"bank_account_id"`
+	PocketName    string    `json:"pocket_name"`
+	Balance       float64   `json:"balance"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type TermDeposit struct {
-	ID            int
-	BankAccountID int
-	Amount        float64
-	InterestRate  float64
-	TermMonths    int
-	StartDate     time.Time
-	MaturityDate  time.Time
-	Status        string
+	ID            int       `json:"id"`
+	BankAccountID int       `json:"bank_account_id"`
+	Amount        float64   `json:"amount"`
+	InterestRate  float64   `json:"interest_rate"`
+	TermMonths    int       `json:"term_months"`
+	StartDate     time.Time `json:"start_date"`
+	MaturityDate  time.Time `json:"maturity_date"`
+	Status        string    `json:"status"`
 }
 
 func (v *QuerySearch) Validate() error {
